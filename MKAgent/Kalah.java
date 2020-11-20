@@ -119,7 +119,6 @@ public class Kalah
 
     	// pick seeds:
     	int seedsToSow = board.getSeeds(move.getSide(), move.getHole());
-        board.setNoLastmove(seedsToSow);
     	board.setSeeds(move.getSide(), move.getHole(), 0);
 
     	int holes = board.getNoOfHoles();
