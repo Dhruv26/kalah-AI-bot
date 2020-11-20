@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#java -jar jar/ManKalah.jar "nc localhost 12346" "java -jar jar/MKAgent.jar"
+
+java -jar jar/ManKalah.jar "java -jar jar/MKRefAgent.jar" "java -jar jar/Agent51.jar"

@@ -1,4 +1,3 @@
-package MKAgent;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
@@ -11,6 +10,8 @@ import java.io.Reader;
  */
 public class Main
 {
+    private static final int holes = 7;
+    private static final int seeds = 7;
     /**
      * Input from the game engine.
      */
@@ -52,8 +53,20 @@ public class Main
 	 * The main method, invoked when the program is started.
 	 * @param args Command line arguments.
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		// TODO: implement
+        try
+    	{
+            Agent agent = new Agent(holes,seeds);
+            agent.play();
+        } catch(InvalidMessageException e) {
+            System.err.println("This shouldn't happen: " + e.getMessage());
+        } catch(IOException e) {
+        	System.err.println("This shouldn't happen: " + e.getMessage());
+        } catch(CloneNotSupportedException e) {
+            System.err.println("This shouldn't happen: " + e.getMessage());
+        }
 	}
+
 }

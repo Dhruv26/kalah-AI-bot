@@ -1,4 +1,4 @@
-package MKAgent;
+
 /**
  * Creates messages to be sent and interprets messages received.
  */
@@ -91,7 +91,7 @@ public class Protocol
 
     /**
      * Interprets a "state_change" message. Should be called if
-     * getMessageType(msg) returns MsgType.STATE 
+     * getMessageType(msg) returns MsgType.STATE
      * @param msg The message.
      * @param board This is an output parameter. It will store the new state
      *        of the Kalah board. The board has to have the right dimensions
@@ -177,4 +177,3 @@ public class Protocol
     	return moveTurn;
     }
 }
-
