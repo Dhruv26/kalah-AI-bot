@@ -1,7 +1,9 @@
+package kalahgame;
+
 import java.util.Observable;
 
 /**
-* Representation of the Kalah board.<BR><BR>
+* Representation of the kalahgame.Kalah board.<BR><BR>
 * The board has two sides: "North" and
 * "South". On each side there is a number of linearly arranged "holes" (the
 * same number on each side) and a "store" for each side. Holes are numbered
@@ -104,7 +106,7 @@ public class Board extends Observable implements Cloneable
 	* @see #Board(Board)
 	*/
 	@Override
-	public Board clone() throws CloneNotSupportedException
+	public Board clone()
 	{
 		return new Board(this);
 	}

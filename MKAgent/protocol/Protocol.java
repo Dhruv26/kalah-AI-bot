@@ -1,3 +1,7 @@
+package protocol;
+
+import kalahgame.Board;
+import kalahgame.Side;
 
 /**
  * Creates messages to be sent and interprets messages received.
@@ -68,7 +72,7 @@ public class Protocol
 
     /**
      * Interprets a "new_match" message. Should be called if
-     * getMessageType(msg) returns MsgType.START
+     * getMessageType(msg) returns protocol.MsgType.START
      * @param msg The message.
      * @return "true" if this agent is the starting player (South), "false"
      *         otherwise.
@@ -91,11 +95,11 @@ public class Protocol
 
     /**
      * Interprets a "state_change" message. Should be called if
-     * getMessageType(msg) returns MsgType.STATE
+     * getMessageType(msg) returns protocol.MsgType.STATE
      * @param msg The message.
      * @param board This is an output parameter. It will store the new state
-     *        of the Kalah board. The board has to have the right dimensions
-     *        (number of holes), otherwise an InvalidMessageException is
+     *        of the kalahgame.Kalah board. The board has to have the right dimensions
+     *        (number of holes), otherwise an protocol.InvalidMessageException is
      *        thrown.
      * @return information about the move that led to the state change and
      *         who's turn it is next.
@@ -133,9 +137,9 @@ public class Protocol
     	// 2nd argument: the board
     	String[] boardParts = msgParts[2].split(",", -1);
     	/*if (boardParts.length % 2 != 0)
-    		throw new InvalidMessageException("Malformed board: odd number of entries.");*/
+    		throw new protocol.InvalidMessageException("Malformed board: odd number of entries.");*/
     	if (2*(board.getNoOfHoles()+1) != boardParts.length)
-    		throw new InvalidMessageException("Board dimensions in message ("
+    		throw new InvalidMessageException("kalahgame.Board dimensions in message ("
     				+ boardParts.length + " entries) are not as expected ("
     				+ 2*(board.getNoOfHoles()+1) + " entries).");
     	try

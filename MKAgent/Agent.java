@@ -1,5 +1,13 @@
-import java.io.*;
-import java.util.concurrent.ThreadLocalRandom;
+import kalahgame.Board;
+import kalahgame.Kalah;
+import kalahgame.Move;
+import kalahgame.Side;
+import kalahplayer.Heuristic;
+import protocol.InvalidMessageException;
+import protocol.MsgType;
+import protocol.Protocol;
+
+import java.io.IOException;
 
 
 public class Agent {
@@ -22,7 +30,7 @@ public class Agent {
   protected void swap() {
     this.ourSide = this.ourSide.opposite();
   }
-  // Method for choosing the next Move currently a stub
+  // Method for choosing the next kalahgame.Move currently a stub
   protected int bestNextMove() throws CloneNotSupportedException, IOException {
     int bestMove = 0;
 
@@ -56,7 +64,7 @@ public class Agent {
     // Means we are first player
     if (Protocol.interpretStartMsg(msg)) {
       this.ourSide = Side.SOUTH;
-      // First Move
+      // First kalahgame.Move
       Main.sendMsg(Heuristic.firstMove());
     }
     else {

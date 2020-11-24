@@ -1,6 +1,10 @@
+package kalahgame;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * This class deals with moves on a Kalah board.
+ * This class deals with moves on a kalahgame.Kalah board.
  */
 public class Kalah
 {
@@ -18,6 +22,10 @@ public class Kalah
     	if (board == null)
     		throw new NullPointerException();
     	this.board = board;
+    }
+
+    public Kalah clone() {
+        return new Kalah(board.clone());
     }
 
     /**
@@ -67,6 +75,11 @@ public class Kalah
     	return gameOver(board);
     }
 
+    public List<Move> getAllPossibleMoves() {
+    	// TODO: Implement
+		return Collections.emptyList();
+	}
+
     /**
      * Checks whether a given move is legal on a given board. The move
      * is not actually made.
@@ -104,7 +117,7 @@ public class Kalah
 		      opponent's kalahah is skipped.
 		   2. outcome:
 		    	1. if the last counter is put into the player's kalahah, the player is allowed to
-		    	   move again (such a move is called a Kalah-move);
+		    	   move again (such a move is called a kalahgame.Kalah-move);
 		    	2. if the last counter is put in an empty hole on the player's side of the board
 		    	   and the opposite hole is non-empty,
 		    	   a capture takes place: all stones in the opposite opponents pit and the last

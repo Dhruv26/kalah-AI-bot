@@ -1,6 +1,7 @@
+package kalahgame;
 
 /**
- * The side of the Kalah board a player can choose.
+ * The side of the kalahgame.Kalah board a player can choose.
  */
 public enum Side
 {
