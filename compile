@@ -1,4 +1,5 @@
 #!/bin/bash
 
 javac -cp MKAgent MKAgent/Main.java
-rm MKAgent/*.class
+jar cfm jar/Agent51.jar Manifest.txt MKAgent/*.class
+find . -type f -name "*.class" -delete
