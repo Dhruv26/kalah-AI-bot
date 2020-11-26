@@ -1,5 +1,3 @@
 #!/bin/bash
 
-#java -jar jar/ManKalah.jar "nc localhost 12346" "java -jar jar/MKAgent.jar"
-# TODO: Fix
-java -jar jar/ManKalah.jar "java -jar jar/MKRefAgent.jar" "java -jar jar/Agent51.jar"
+java -jar jar/ManKalah.jar "java -jar Test_Agents/MKRefAgent.jar" "java -jar Agent51.jar"

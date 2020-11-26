@@ -32,8 +32,12 @@ public class Node {
     }
 
     public Node clone() {
-        // TODO: Implement
-        return null;
+        Node clone = new Node(state.clone(), move, parent);
+        clone.setVisits(visits);
+        clone.setReward(reward);
+        children.forEach(clone::addChild);
+        unexploredMoves.forEach(clone::addUnexploredMoves);
+        return clone;
     }
 
     public Kalah getState() {
@@ -52,7 +56,7 @@ public class Node {
         return visits;
     }
 
-    public void setVisits(int visits) {
+    private void setVisits(int visits) {
         this.visits = visits;
     }
 
@@ -64,19 +68,28 @@ public class Node {
         return reward;
     }
 
-    public void setReward(double reward) {
+    private void setReward(double reward) {
         this.reward = reward;
     }
 
     public List<Node> getChildren() {
-        return children;
+        return new ArrayList<>(children);
+    }
+
+    public void addChild(Node childNode) {
+        children.add(childNode);
+        unexploredMoves.remove(childNode.getMove());
     }
 
     public List<Move> getUnexploredMoves() {
-        return unexploredMoves;
+        return new ArrayList<>(unexploredMoves);
     }
 
-    public boolean isLeaf() {
+    private void addUnexploredMoves(Move unexploredMove) {
+        unexploredMoves.add(unexploredMove);
+    }
+
+    public boolean isTerminalNode() {
         // A node cannot have children if no more moves are possible
         // from the current state
         return state.getAllPossibleMoves().size() == 0;
@@ -86,19 +99,32 @@ public class Node {
         return unexploredMoves.size() == 0;
     }
 
-    public void addChild(Node childNode) {
-        children.add(childNode);
-        unexploredMoves.remove(childNode.getMove());
-    }
-
     public Node getChildWithHighestUTCReward() {
         return getChildren().stream()
                 .max(comparing(child -> uctReward(this, child)))
                 .orElseThrow(NoSuchElementException::new);
     }
 
+    public void update(double reward) {
+        setReward(getReward() + reward);
+        setVisits(getVisits() + 1);
+    }
+
     private static double uctReward(Node node, Node child) {
         return (child.getReward() / child.getVisits())
                 + (EXPLORATION_CONSTANT * Math.sqrt(2 * Math.log(node.getVisits()) / child.getVisits()));
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "state=" + state +
+                ", move=" + move +
+                ", parent=" + parent +
+                ", children=" + children +
+                ", unexploredMoves=" + unexploredMoves +
+                ", visits=" + visits +
+                ", reward=" + reward +
+                '}';
     }
 }

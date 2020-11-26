@@ -1,4 +1,5 @@
 /.project
+jar
 
 # Log file
 *.log
@@ -18,7 +19,6 @@ out/
 ##############################
 .mtj.tmp/
 *.class
-*.jar
 *.war
 *.ear
 *.nar

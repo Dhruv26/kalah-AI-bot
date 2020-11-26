@@ -70,5 +70,4 @@ public class Main
             System.err.println("This shouldn't happen: " + e.getMessage());
         }
 	}
-
 }

@@ -245,4 +245,11 @@ public class Kalah
 
     	return holesEmpty(board, Side.NORTH) || holesEmpty(board, Side.SOUTH);
     }
+
+	public Side getSideToMove() {
+    	// Used in MCTS. This should return the side that controls
+		// the move for the current state
+		// TODO: Implement
+		return null;
+	}
 }

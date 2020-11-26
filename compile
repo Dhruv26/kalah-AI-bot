@@ -1,6 +1,4 @@
 #!/bin/bash
 
-# TODO: Fix
-javac *.java
-jar cfm jar/Agent51.jar Manifest.txt *.class
-rm *.class
+javac -cp MKAgent MKAgent/Main.java
+rm MKAgent/*.class
