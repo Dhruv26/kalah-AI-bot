@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.logging.Level;
 
 /**
  * The main application class. It also provides methods for communication
@@ -60,6 +61,10 @@ public class Main
 		// TODO: implement
         try
     	{
+            // Log log = new Log("log");
+            // log.logger.setLevel(Level.INFO);
+            // log.logger.info("test log");
+
             Agent agent = new Agent(holes,seeds);
             agent.play();
         } catch(InvalidMessageException e) {
@@ -68,6 +73,8 @@ public class Main
         	System.err.println("This shouldn't happen: " + e.getMessage());
         } catch(CloneNotSupportedException e) {
             System.err.println("This shouldn't happen: " + e.getMessage());
+        } catch(Exception e) {
+
         }
 	}
 }
