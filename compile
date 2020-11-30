@@ -1,5 +1,8 @@
 #!/bin/bash
 
-javac -cp MKAgent MKAgent/Main.java
-jar cfm jar/Agent51.jar Manifest.txt MKAgent/*.class
-find . -type f -name "*.class" -delete
+# Create classes folder if it does not exist
+mkdir -p classes
+mkdir -p jar
+
+javac -d classes -sourcepath MKAgent MKAgent/Main.java
+jar cf jar/Agent51.jar -C classes/ .

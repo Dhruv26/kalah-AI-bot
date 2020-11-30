@@ -1,5 +1,6 @@
 /.project
 jar
+classes
 
 # Log file
 *.log
