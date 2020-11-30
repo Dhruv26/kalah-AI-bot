@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Create classes folder if it does not exist
+# Create folders if they do not exist
 mkdir -p classes
 mkdir -p jar
 

@@ -8,9 +8,11 @@ import protocol.MsgType;
 import protocol.Protocol;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 
 public class Agent {
+  private static final Logger LOGGER = Log.getLogger(Agent.class);
 
   protected Side ourSide;
   protected Kalah kalah;
@@ -48,6 +50,7 @@ public class Agent {
 
   public void play() throws IOException, InvalidMessageException, CloneNotSupportedException {
 
+    LOGGER.info("Starting game...");
     // Receive Message
     String msg = Main.recvMsg();
     // Choose the Message Type
