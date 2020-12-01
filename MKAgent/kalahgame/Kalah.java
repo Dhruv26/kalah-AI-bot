@@ -1,6 +1,6 @@
 package kalahgame;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,6 +8,12 @@ import java.util.List;
  */
 public class Kalah
 {
+	// Player's side (SOUTH or NORTH)
+	private Side mySide;
+	
+	// Side which has to do next move
+	private Side sideToMove;
+
     /**
      * The board to play on.
      */
@@ -17,15 +23,16 @@ public class Kalah
      * @param board The board to play on.
      * @throws NullPointerException if "board" is null.
      */
-    public Kalah (Board board) throws NullPointerException
+    public Kalah (Board board, Side mySide) throws NullPointerException
     {
     	if (board == null)
     		throw new NullPointerException();
-    	this.board = board;
+		this.board = board;
+		this.mySide = mySide;
     }
 
     public Kalah clone() {
-        return new Kalah(board.clone());
+        return new Kalah(board.clone(), getMySide());
     }
 
     /**
@@ -76,8 +83,14 @@ public class Kalah
     }
 
     public List<Move> getAllPossibleMoves() {
-    	// TODO: Implement
-		return Collections.emptyList();
+		List<Move> movesList = new ArrayList<Move>();
+		int holes = board.getNoOfHoles();
+		for (int i = 1; i <= holes; i++) {
+			Move m = new Move(getMySide(), i);
+			if (isLegalMove(m))
+				movesList.add(m);
+		}
+		return movesList;
 	}
 
     /**
@@ -249,7 +262,18 @@ public class Kalah
 	public Side getSideToMove() {
     	// Used in MCTS. This should return the side that controls
 		// the move for the current state
-		// TODO: Implement
-		return null;
+		return getSideToMove();
+	}
+
+	public Side getMySide() {
+		return mySide;
+	}
+
+	public void setMySide(Side mySide) {
+		this.mySide = mySide;
+	}
+
+	public void setSideToMove(Side sideToMove) {
+		this.sideToMove = sideToMove;
 	}
 }

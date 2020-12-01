@@ -8,43 +8,33 @@ import protocol.MsgType;
 import protocol.Protocol;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
-
 
 public class Agent {
   private static final Logger LOGGER = Log.getLogger(Agent.class);
 
-  protected Side ourSide;
   protected Kalah kalah;
   protected int holes;
   // protected int maxDepth; // for future use
 
   public Agent(final int holes, final int seeds) throws IOException {
-    this.ourSide = Side.SOUTH;
     this.holes = holes;
-    this.kalah = new Kalah(new Board(holes, seeds));
+    this.kalah = new Kalah(new Board(holes, seeds), Side.SOUTH);
     // this.maxDepth = 4; For future use (Alpha beta pruning or min max)
   }
 
-//---------------------------------------------------------------------------------------------------------------
-
+  // ---------------------------------------------------------------------------------------------------------------
 
   protected void swap() {
-    this.ourSide = this.ourSide.opposite();
+    kalah.setMySide(kalah.getMySide().opposite());
   }
+
   // Method for choosing the next kalahgame.Move currently a stub
   protected int bestNextMove() throws CloneNotSupportedException, IOException {
     int bestMove = 0;
-
-    for (int i = 1; i <= this.holes; ++i) {
-      Move m = new Move(this.ourSide,i);
-      if(this.kalah.isLegalMove(m))
-      {
-        bestMove = i;
-        break;
-      }
-    }
-
+    List<Move> allPossibleMoves = kalah.getAllPossibleMoves();
+    bestMove = allPossibleMoves.get(allPossibleMoves.size() - 1).getHole();
     return bestMove;
   }
 
@@ -66,13 +56,13 @@ public class Agent {
     // If the start message is SOUTH
     // Means we are first player
     if (Protocol.interpretStartMsg(msg)) {
-      this.ourSide = Side.SOUTH;
+      kalah.setMySide(Side.SOUTH);
       // First kalahgame.Move
       Main.sendMsg(Heuristic.firstMove());
     }
     else {
       // Means we are second player
-      this.ourSide = Side.NORTH;
+      kalah.setMySide(Side.NORTH);
     }
     // Game Loop
     while (true) {
