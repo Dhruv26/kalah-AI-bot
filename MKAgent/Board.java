@@ -36,6 +36,8 @@ public class Board extends Observable implements Cloneable
 	*/
 	private int[][] board;
 
+	private int lastMove_number;
+
 	/**
 	* @param side A side of the board.
 	* @return The index of side "side" for the first dimension of "board".
@@ -116,6 +118,18 @@ public class Board extends Observable implements Cloneable
 	{
 		return holes;
 	}
+
+	// get the last move number ,used in Agent_Heuristic
+	public int getNoLastmove (  )
+	{
+		return lastMove_number;
+	}
+
+    // set the last move number, used in kalah
+	public void setNoLastmove(int n){
+		lastMove_number = n;
+	}
+
 
 	/**
 	* Get the number of seeds in a hole.

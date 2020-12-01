@@ -120,7 +120,7 @@ public class Kalah
     	// pick seeds:
     	int seedsToSow = board.getSeeds(move.getSide(), move.getHole());
     	board.setSeeds(move.getSide(), move.getHole(), 0);
-
+        board.setNoLastmove(seedsToSow);
     	int holes = board.getNoOfHoles();
     	int receivingPits = 2*holes + 1;  // sow into: all holes + 1 store
     	int rounds = seedsToSow / receivingPits;  // sowing rounds

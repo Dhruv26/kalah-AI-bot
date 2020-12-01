@@ -58,7 +58,8 @@ public class Main
 		// TODO: implement
         try
     	{
-            Agent agent = new Agent(holes,seeds);
+            Agent_Heuristic agent = new Agent_Heuristic(holes,seeds);
+//            Agent agent = new Agent(holes,seeds);
             agent.play();
         } catch(InvalidMessageException e) {
             System.err.println("This shouldn't happen: " + e.getMessage());
