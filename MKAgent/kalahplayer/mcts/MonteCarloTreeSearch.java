@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 public class MonteCarloTreeSearch implements KalahPlayer {
     private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearch.class);
-    private static final int NUM_SIMULATIONS = 500;
+    private static final int NUM_SIMULATIONS = 50000;
 
     private Node root;
 
@@ -24,13 +24,10 @@ public class MonteCarloTreeSearch implements KalahPlayer {
      */
     private void search(Node node) {
         for (int sims = 0; sims < NUM_SIMULATIONS; sims++) {
-            LOGGER.info("==========================================================");
             Node bestChild = MonteCarloTreeSearchActions.select(node);
             Kalah leafState = MonteCarloTreeSearchActions.simulate(bestChild);
             MonteCarloTreeSearchActions.backpropagate(bestChild, leafState);
-            LOGGER.info("Done simulation " + sims);
         }
-        LOGGER.info("==========================================================");
         LOGGER.info("Completed building MCTS.");
     }
 

@@ -31,13 +31,18 @@ public class Node {
         this.unexploredMoves = state.getAllPossibleMoves();
     }
 
+    private Node(Node other) {
+        this.state = other.state.clone();
+        this.move = other.move;
+        this.parent = other.parent;
+        this.visits = other.visits;
+        this.reward = other.reward;
+        this.children = new ArrayList<>(other.children);
+        this.unexploredMoves = new ArrayList<>(other.unexploredMoves);
+    }
+
     public Node clone() {
-        Node clone = new Node(state.clone(), move, parent);
-        clone.setVisits(visits);
-        clone.setReward(reward);
-        children.forEach(clone::addChild);
-        unexploredMoves.forEach(clone::addUnexploredMoves);
-        return clone;
+        return new Node(this);
     }
 
     public Kalah getState() {
@@ -58,10 +63,6 @@ public class Node {
 
     private void setVisits(int visits) {
         this.visits = visits;
-    }
-
-    public void addVisit() {
-        setVisits(getVisits() + 1);
     }
 
     public double getReward() {
@@ -120,7 +121,7 @@ public class Node {
         return "Node{" +
                 "state=" + state +
                 ", move=" + move +
-                ", parent=" + parent +
+                ", has parent=" + (parent != null) +
                 ", number of children=" + children.size() +
                 ", number of unexploredMoves=" + unexploredMoves.size() +
                 ", visits=" + visits +

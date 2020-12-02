@@ -93,10 +93,10 @@ public class Kalah
     }
 
     public List<Move> getAllPossibleMoves() {
-		List<Move> movesList = new ArrayList<Move>();
+		List<Move> movesList = new ArrayList<>();
 		int holes = board.getNoOfHoles();
 		for (int i = 1; i <= holes; i++) {
-			Move m = new Move(getMySide(), i);
+			Move m = new Move(getSideToMove(), i);
 			if (isLegalMove(m))
 				movesList.add(m);
 		}

@@ -23,7 +23,6 @@ class MonteCarloTreeSearchActions {
      * @return Best child node based on UTC score
      */
     static Node select(Node root) {
-        LOGGER.info("Selecting best child node.");
         Node bestChild = root;
         while (!bestChild.isTerminalNode()) {
             if (!bestChild.allMovesExplored()) {
@@ -59,15 +58,10 @@ class MonteCarloTreeSearchActions {
      * @return Random terminal node reached from the root node
      */
     static Kalah simulate(Node root) {
-        LOGGER.info("Simulating...");
         Node node = root.clone();
-        LOGGER.info("Node cloned...");
         while (!node.isTerminalNode()) {
-            List<Move> allPossibleMoves = node.getState().getAllPossibleMoves();
-            Move legalMove = getRandomMove(allPossibleMoves);
-            LOGGER.info("All possible moves retrieved...");
+            Move legalMove = getRandomMove(node.getState().getAllPossibleMoves());
             node.getState().makeMove(legalMove);
-            LOGGER.info("Board state updated...");
         }
         return node.getState();
     }
@@ -80,7 +74,6 @@ class MonteCarloTreeSearchActions {
      * @param finalState Final state, ie result of the simulation
      */
     static void backpropagate(Node node, Kalah finalState) {
-        LOGGER.info("Backpropagating...");
         Node parentNode = node;
         while (parentNode != null) {
             Side side = parentNode.getParent() != null ?
