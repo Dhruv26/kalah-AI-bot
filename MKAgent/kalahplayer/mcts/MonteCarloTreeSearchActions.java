@@ -5,11 +5,14 @@ import kalahgame.Kalah;
 import kalahgame.Move;
 import kalahgame.Side;
 import kalahplayer.mcts.tree.Node;
+import utils.Log;
 
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 class MonteCarloTreeSearchActions {
+    private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearchActions.class);
     private static final Random RANDOM = new Random();
 
     /**
@@ -20,7 +23,8 @@ class MonteCarloTreeSearchActions {
      * @return Best child node based on UTC score
      */
     static Node select(Node root) {
-        Node bestChild = root.clone();
+        LOGGER.info("Selecting best child node.");
+        Node bestChild = root;
         while (!bestChild.isTerminalNode()) {
             if (!bestChild.allMovesExplored()) {
                 return expand(bestChild);
@@ -54,13 +58,18 @@ class MonteCarloTreeSearchActions {
      * @param root Node to start simulation from
      * @return Random terminal node reached from the root node
      */
-    static Node simulate(Node root) {
+    static Kalah simulate(Node root) {
+        LOGGER.info("Simulating...");
         Node node = root.clone();
+        LOGGER.info("Node cloned...");
         while (!node.isTerminalNode()) {
-            Move legalMove = getRandomMove(node.getState().getAllPossibleMoves());
+            List<Move> allPossibleMoves = node.getState().getAllPossibleMoves();
+            Move legalMove = getRandomMove(allPossibleMoves);
+            LOGGER.info("All possible moves retrieved...");
             node.getState().makeMove(legalMove);
+            LOGGER.info("Board state updated...");
         }
-        return node;
+        return node.getState();
     }
 
     /**
@@ -71,6 +80,7 @@ class MonteCarloTreeSearchActions {
      * @param finalState Final state, ie result of the simulation
      */
     static void backpropagate(Node node, Kalah finalState) {
+        LOGGER.info("Backpropagating...");
         Node parentNode = node;
         while (parentNode != null) {
             Side side = parentNode.getParent() != null ?

@@ -1,10 +1,12 @@
 import protocol.InvalidMessageException;
+import utils.Log;
 
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -60,13 +62,11 @@ public class Main
 	 */
 	public static void main(String[] args)
 	{
-		LOGGER.warning("Main is executing...");
-        try
-    	{
-            Agent agent = new Agent(holes,seeds);
-            agent.play();
-        } catch(InvalidMessageException | CloneNotSupportedException | IOException e) {
-            System.err.println("This shouldn't happen: " + e.getMessage());
-        }
+		try {
+			Agent agent = new Agent(holes, seeds);
+			agent.play();
+		} catch (InvalidMessageException | IOException e) {
+			LOGGER.log(Level.SEVERE, "This shouldn't happen: " + e.getMessage(), e);
+		}
 	}
 }

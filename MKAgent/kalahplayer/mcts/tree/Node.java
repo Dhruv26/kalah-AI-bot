@@ -92,11 +92,11 @@ public class Node {
     public boolean isTerminalNode() {
         // A node cannot have children if no more moves are possible
         // from the current state
-        return state.getAllPossibleMoves().size() == 0;
+        return state.getAllPossibleMoves().isEmpty();
     }
 
     public boolean allMovesExplored() {
-        return unexploredMoves.size() == 0;
+        return unexploredMoves.isEmpty();
     }
 
     public Node getChildWithHighestUTCReward() {
@@ -121,8 +121,8 @@ public class Node {
                 "state=" + state +
                 ", move=" + move +
                 ", parent=" + parent +
-                ", children=" + children +
-                ", unexploredMoves=" + unexploredMoves +
+                ", number of children=" + children.size() +
+                ", number of unexploredMoves=" + unexploredMoves.size() +
                 ", visits=" + visits +
                 ", reward=" + reward +
                 '}';

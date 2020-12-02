@@ -23,16 +23,25 @@ public class Kalah
      * @param board The board to play on.
      * @throws NullPointerException if "board" is null.
      */
-    public Kalah (Board board, Side mySide) throws NullPointerException
+    public Kalah (Board board, Side mySide)
     {
     	if (board == null)
     		throw new NullPointerException();
 		this.board = board;
 		this.mySide = mySide;
+		this.sideToMove = Side.SOUTH;
     }
 
+    public Kalah(Kalah other) {
+    	if (other == null)
+    		throw new NullPointerException("other cannot be null.");
+    	this.board = other.board.clone();
+    	this.mySide = other.mySide;
+    	this.sideToMove = other.sideToMove;
+	}
+
     public Kalah clone() {
-        return new Kalah(board.clone(), getMySide());
+        return new Kalah(this);
     }
 
     /**
@@ -70,7 +79,8 @@ public class Kalah
      */
     public Side makeMove (Move move)
     {
-    	return makeMove(board, move);
+    	setSideToMove(makeMove(board, move));
+    	return getSideToMove();
     }
 
     /**
@@ -122,7 +132,7 @@ public class Kalah
      * @see #gameOver(Board)
      * @see java.util.Observable#notifyObservers(Object)
      */
-    public static Side makeMove (Board board, Move move)
+    private static Side makeMove (Board board, Move move)
     {
 		/* from the documentation:
 		  "1. The counters are lifted from this hole and sown in anti-clockwise direction, starting
@@ -255,14 +265,11 @@ public class Kalah
     public static boolean gameOver (Board board)
     {
     	// The game is over if one of the agents can't make another move.
-
     	return holesEmpty(board, Side.NORTH) || holesEmpty(board, Side.SOUTH);
     }
 
 	public Side getSideToMove() {
-    	// Used in MCTS. This should return the side that controls
-		// the move for the current state
-		return getSideToMove();
+		return sideToMove;
 	}
 
 	public Side getMySide() {
@@ -275,5 +282,14 @@ public class Kalah
 
 	public void setSideToMove(Side sideToMove) {
 		this.sideToMove = sideToMove;
+	}
+
+	@Override
+	public String toString() {
+		return "Kalah{" +
+				"mySide=" + mySide +
+				", sideToMove=" + sideToMove +
+				", board=" + board +
+				'}';
 	}
 }
