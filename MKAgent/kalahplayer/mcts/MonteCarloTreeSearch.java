@@ -1,11 +1,11 @@
 package kalahplayer.mcts;
+import java.util.logging.Logger;
 
 import kalahgame.Kalah;
+import kalahgame.Move;
 import kalahplayer.KalahPlayer;
 import kalahplayer.mcts.tree.Node;
 import utils.Log;
-
-import java.util.logging.Logger;
 
 public class MonteCarloTreeSearch implements KalahPlayer {
     private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearch.class);
@@ -35,13 +35,15 @@ public class MonteCarloTreeSearch implements KalahPlayer {
     public int getBestMove(Kalah state) {
         Node node = new Node(state, null, null);
         search(node);
-        // TODO: Select best child based on some policy
-        return 5;
+        Node bestNode = node.getChildWithHighestUTCReward();
+        Move bestMove = bestNode.getMove();
+        LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() + ", visits: " + bestNode.getVisits());
+        return bestMove.getHole();
     }
 
     @Override
     public void performMove(int move) {
-        // TODO: This should used to update the root of the tree
+        root = root.getChildren().get(move);
     }
 
     /**

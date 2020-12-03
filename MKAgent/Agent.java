@@ -62,7 +62,7 @@ public class Agent {
     // Means we are first player
     if (Protocol.interpretStartMsg(msg)) {
       kalah.setMySide(Side.SOUTH);
-      Main.sendMsg(Heuristic.firstMove());
+      Main.sendMsg(Protocol.createMoveMsg(bestMove));
     }
     else {
       kalah.setMySide(Side.NORTH);

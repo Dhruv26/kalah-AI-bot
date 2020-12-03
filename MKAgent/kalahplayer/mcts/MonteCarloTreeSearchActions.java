@@ -1,15 +1,15 @@
 package kalahplayer.mcts;
 
+import java.util.List;
+import java.util.Random;
+import java.util.logging.Logger;
+
 import kalahgame.Board;
 import kalahgame.Kalah;
 import kalahgame.Move;
 import kalahgame.Side;
 import kalahplayer.mcts.tree.Node;
 import utils.Log;
-
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Logger;
 
 class MonteCarloTreeSearchActions {
     private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearchActions.class);
@@ -93,6 +93,6 @@ class MonteCarloTreeSearchActions {
         }
         Board board = finalState.getBoard();
         // Whoever has more seeds at the end of the game wins
-        return Integer.compare(board.getSeedsInStore(side), board.getSeedsInStore(side.opposite()));
+        return board.getSeedsInStore(side) - board.getSeedsInStore(side.opposite());
     }
 }
