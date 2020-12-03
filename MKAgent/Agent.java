@@ -11,6 +11,7 @@ import protocol.Protocol;
 import utils.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -19,21 +20,24 @@ public class Agent {
 
   protected Kalah kalah;
   protected int holes;
-  // protected int maxDepth; // for future use
 
   public Agent(final int holes, final int seeds) {
     this.holes = holes;
     this.kalah = new Kalah(new Board(holes, seeds), Side.SOUTH);
-    // this.maxDepth = 4; For future use (Alpha beta pruning or min max)
   }
 
   protected void swap() {
     kalah.setMySide(kalah.getMySide().opposite());
   }
 
-  // Method for choosing the next kalahgame.Move currently a stub
   protected int bestNextMove() {
-    List<Move> allPossibleMoves = kalah.getAllPossibleMoves();
+    List<Move> allPossibleMoves = new ArrayList<>();
+    for (int moveHole = 1; moveHole <= kalah.getBoard().getNoOfHoles(); moveHole++)
+    {
+      Move move = new Move(kalah.getMySide(), moveHole);
+      if (kalah.isLegalMove(move))
+        allPossibleMoves.add(move);
+    }
     return allPossibleMoves.get(allPossibleMoves.size() - 1).getHole();
   }
 
