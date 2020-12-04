@@ -280,6 +280,10 @@ public class Kalah
 		this.mySide = mySide;
 	}
 
+	public void swapMySide() {
+    	setMySide(getMySide().opposite());
+	}
+
 	public void setSideToMove(Side sideToMove) {
 		this.sideToMove = sideToMove;
 	}
