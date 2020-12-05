@@ -117,12 +117,17 @@ public class Kalah
 
     public List<Move> getAllPossibleMoves() {
 		List<Move> movesList = new ArrayList<>();
-		int holes = board.getNoOfHoles();
-		for (int i = 1; i <= holes; i++) {
+
+		for (int i = 1; i <= board.getNoOfHoles(); i++) {
 			Move m = new Move(getSideToMove(), i);
 			if (isLegalMove(m))
 				movesList.add(m);
 		}
+		Move swapMove = new Move(getSideToMove(), Move.SWAP);
+		if (isLegalMove(swapMove)) {
+			movesList.add(swapMove);
+		}
+
 		return movesList;
 	}
 
@@ -323,6 +328,7 @@ public class Kalah
 		return "Kalah{" +
 				"mySide=" + mySide +
 				", sideToMove=" + sideToMove +
+				", northHasMoved=" + northHasMoved +
 				", board=" + board +
 				'}';
 	}
