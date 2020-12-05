@@ -1,10 +1,12 @@
 package kalahgame;
 
 /**
- * Represents a move (not a turn) in the kalahgame.Kalah game.
+ * Represents a move (not a turn) in the Kalah game.
  */
 public class Move
 {
+	public static final int SWAP = -1;
+
 	/**
 	 * The side of the board the player making the move is playing on.
 	 */
@@ -25,7 +27,7 @@ public class Move
      */
     public Move (Side side, int hole) throws IllegalArgumentException
     {
-    	if (hole < 1)
+    	if (hole < 1 && hole != SWAP)
     		throw new IllegalArgumentException("Hole numbers must be >= 1, but " + hole + " was given.");
     	this.side = side;
     	this.hole = hole;
@@ -47,4 +49,16 @@ public class Move
     {
 		return hole;
     }
+
+    public boolean isSwap() {
+    	return hole == SWAP && side == Side.NORTH;
+	}
+
+	@Override
+	public String toString() {
+		return "Move{" +
+				"side=" + side +
+				", hole=" + hole +
+				'}';
+	}
 }

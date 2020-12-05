@@ -13,6 +13,7 @@ public class Kalah
 	
 	// Side which has to do next move
 	private Side sideToMove;
+	private boolean northHasMoved;
 
     /**
      * The board to play on.
@@ -30,6 +31,7 @@ public class Kalah
 		this.board = board;
 		this.mySide = mySide;
 		this.sideToMove = Side.SOUTH;
+		this.northHasMoved = false;
     }
 
     public Kalah(Kalah other) {
@@ -38,6 +40,7 @@ public class Kalah
     	this.board = other.board.clone();
     	this.mySide = other.mySide;
     	this.sideToMove = other.sideToMove;
+    	this.northHasMoved = other.northHasMoved;
 	}
 
     public Kalah clone() {
@@ -55,13 +58,18 @@ public class Kalah
     /**
      * Checks whether a given move is legal on the underlying board. The move
      * is not actually made.
+	 *
      * @param move The move to check.
      * @return true if the move is legal, false if not.
      */
     public boolean isLegalMove (Move move)
     {
-    	return isLegalMove(board, move);
+    	return isLegalMove(board, move, northHasMoved);
     }
+
+	public Side makeMove(int hole) {
+		return makeMove(new Move(getSideToMove(), hole));
+	}
 
     /**
      * Performs a move on the underlying board. The move must be legal. If
@@ -79,8 +87,23 @@ public class Kalah
      */
     public Side makeMove (Move move)
     {
-    	setSideToMove(makeMove(board, move));
-    	return getSideToMove();
+    	if (!isLegalMove(move)) {
+			throw new RuntimeException("Illegal move [" + move + "] for current state [" + this + "]");
+		}
+		if (move.getSide() == Side.NORTH) {
+			northHasMoved = true;
+		}
+
+		Side sideToMoveNext;
+		if (move.isSwap()) {
+			swapMySide();
+			sideToMoveNext = Side.NORTH;
+		}
+		else {
+			sideToMoveNext = makeMove(board, move, northHasMoved);
+		}
+		setSideToMove(sideToMoveNext);
+		return getSideToMove();
     }
 
     /**
@@ -106,12 +129,18 @@ public class Kalah
     /**
      * Checks whether a given move is legal on a given board. The move
      * is not actually made.
+	 *
      * @param board The board to check the move for.
      * @param move The move to check.
+	 * @param northHasMoved North has made it's first move.
      * @return true if the move is legal, false if not.
      */
-    public static boolean isLegalMove (Board board, Move move)
+    private static boolean isLegalMove (Board board, Move move, boolean northHasMoved)
     {
+    	if (move.getHole() == -1) {
+    		// Pie rule. SWAP can only be used by NORTH in it's first turn.
+    		return !northHasMoved && move.getSide() == Side.NORTH;
+		}
     	// check if the hole is existent and non-empty:
     	return (move.getHole() <= board.getNoOfHoles())
     	       && (board.getSeeds(move.getSide(), move.getHole()) != 0);
@@ -126,13 +155,14 @@ public class Kalah
      *
      * @param board The board to make the move on.
      * @param move The move to make.
+	 * @param northHasMoved North has made it's first move.
      * @return The side who's turn it is after the move. Arbitrary if the
      *         game is over.
-     * @see #isLegalMove(Board, Move)
+     * @see #isLegalMove(Board, Move, boolean)
      * @see #gameOver(Board)
      * @see java.util.Observable#notifyObservers(Object)
      */
-    private static Side makeMove (Board board, Move move)
+    private static Side makeMove (Board board, Move move, boolean northHasMoved)
     {
 		/* from the documentation:
 		  "1. The counters are lifted from this hole and sown in anti-clockwise direction, starting
@@ -237,7 +267,7 @@ public class Kalah
     	board.notifyObservers(move);
 
     	// who's turn is it?
-    	if (sowHole == 0)  // the store (implies (sowSide == move.getSide()))
+    	if (sowHole == 0 && northHasMoved)  // the store (implies (sowSide == move.getSide()))
     		return move.getSide();  // move again
     	else
     		return move.getSide().opposite();

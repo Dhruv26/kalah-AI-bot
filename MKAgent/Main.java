@@ -65,7 +65,7 @@ public class Main
 		try {
 			Agent agent = new Agent(holes, seeds);
 			agent.play();
-		} catch (InvalidMessageException | IOException e) {
+		} catch (InvalidMessageException | IOException | RuntimeException e) {
 			LOGGER.log(Level.SEVERE, "This shouldn't happen: " + e.getMessage(), e);
 		}
 	}

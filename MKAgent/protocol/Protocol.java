@@ -28,6 +28,15 @@ public class Protocol
 		 * or -1 if the opponent has made a swap.
 		 */
 		public int move;
+
+		@Override
+		public String toString() {
+			return "MoveTurn{" +
+					"end=" + end +
+					", again=" + again +
+					", move=" + move +
+					'}';
+		}
 	}
 
 
@@ -180,4 +189,48 @@ public class Protocol
 
     	return moveTurn;
     }
+
+	public static MoveTurn interpretStateMsg (String msg) throws InvalidMessageException
+	{
+		MoveTurn moveTurn = new MoveTurn();
+
+		if (msg.charAt(msg.length()-1) != '\n')
+			throw new InvalidMessageException("Message not terminated with 0x0A character.");
+
+		String[] msgParts = msg.split(";", 4);
+		if (msgParts.length != 4)
+			throw new InvalidMessageException("Missing arguments.");
+
+		// msgParts[0] is "CHANGE"
+		// 1st argument: the move (or swap)
+		if (msgParts[1].equals("SWAP"))
+			moveTurn.move = -1;
+		else
+		{
+			try
+			{
+				moveTurn.move = Integer.parseInt(msgParts[1]);
+			}
+			catch (NumberFormatException e)
+			{
+				throw new InvalidMessageException("Illegal value for move parameter: " + e.getMessage());
+			}
+		}
+
+		// 3rd argument: who's turn?
+		moveTurn.end = false;
+		if (msgParts[3].equals("YOU\n"))
+			moveTurn.again = true;
+		else if (msgParts[3].equals("OPP\n"))
+			moveTurn.again = false;
+		else if (msgParts[3].equals("END\n"))
+		{
+			moveTurn.end = true;
+			moveTurn.again = false;
+		}
+		else
+			throw new InvalidMessageException("Illegal value for turn parameter: " + msgParts[3]);
+
+		return moveTurn;
+	}
 }
