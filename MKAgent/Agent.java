@@ -15,30 +15,18 @@ public class Agent {
     private static final Logger LOGGER = Log.getLogger(Agent.class);
 
     private final Kalah kalah;
-    private final MonteCarloTreeSearch player;
 
     public Agent(final int holes, final int seeds) {
         this.kalah = new Kalah(new Board(holes, seeds), Side.SOUTH);
-        this.player = new MonteCarloTreeSearch(kalah);
     }
 
     public void play() throws IOException, InvalidMessageException {
-        String msg = Main.recvMsg();
-        MsgType msgType = Protocol.getMessageType(msg);
-
-        verifyMessageType(MsgType.START, msgType);
-        if (Protocol.interpretStartMsg(msg)) {
-            kalah.setMySide(Side.SOUTH);
-            playMove();
-        }
-        else {
-            kalah.setMySide(Side.NORTH);
-        }
+        MonteCarloTreeSearch player = startGameAndGetPlayer();
         LOGGER.info("My side is " + kalah.getMySide() + "\n");
 
         while (true) {
-            msg = Main.recvMsg();
-            msgType = Protocol.getMessageType(msg);
+            String msg = Main.recvMsg();
+            MsgType msgType = Protocol.getMessageType(msg);
             LOGGER.info("Received message: " + msg.strip());
 
             if (msgType == MsgType.END) {
@@ -48,25 +36,42 @@ public class Agent {
 
             verifyMessageType(MsgType.STATE, msgType);
             Protocol.MoveTurn moveTurn = Protocol.interpretStateMsg(msg);
-            Side sideToMoveNext = kalah.makeMove(moveTurn.move);
-            LOGGER.info("Received move: " + moveTurn + ", Next side to move (acc to me): " + sideToMoveNext);
+            updateState(player, moveTurn.move);
+            LOGGER.info("Received move: " + moveTurn);
             LOGGER.info("New state of the game:\n" + kalah);
             if (moveTurn.again) {
-                playMove();
+                playMove(player);
             }
         }
     }
 
-    private void updateState(int moveHole) {
-        //player.performMove(moveHole);
-        kalah.makeMove(moveHole);
+    private MonteCarloTreeSearch startGameAndGetPlayer() throws InvalidMessageException, IOException {
+        String msg = Main.recvMsg();
+        MsgType msgType = Protocol.getMessageType(msg);
+
+        verifyMessageType(MsgType.START, msgType);
+        if (Protocol.interpretStartMsg(msg)) {
+            kalah.setMySide(Side.SOUTH);
+            MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
+            playMove(player);
+            return player;
+        }
+        else {
+            kalah.setMySide(Side.NORTH);
+            return new MonteCarloTreeSearch(kalah);
+        }
     }
 
-    private void playMove() {
+    private void updateState(MonteCarloTreeSearch player, int moveHole) {
+        kalah.makeMove(moveHole);
+        player.performMove(moveHole);
+    }
+
+    private void playMove(MonteCarloTreeSearch player) {
         String moveMsg;
-        int bestMove = player.getBestMove(kalah);
+        int bestMove = player.getBestMove();
         if (bestMove == Move.SWAP) {
-            updateState(bestMove);
+            updateState(player, bestMove);
             moveMsg = Protocol.createSwapMsg();
         }
         else {

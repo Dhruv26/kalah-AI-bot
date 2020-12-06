@@ -1,11 +1,13 @@
 package kalahplayer.mcts;
-import java.util.logging.Logger;
 
 import kalahgame.Kalah;
 import kalahgame.Move;
 import kalahplayer.KalahPlayer;
 import kalahplayer.mcts.tree.Node;
 import utils.Log;
+
+import java.util.Optional;
+import java.util.logging.Logger;
 
 public class MonteCarloTreeSearch implements KalahPlayer {
     private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearch.class);
@@ -14,17 +16,15 @@ public class MonteCarloTreeSearch implements KalahPlayer {
     private Node root;
 
     public MonteCarloTreeSearch(Kalah state) {
-        root = new Node(state, null, null);
+        root = new Node(state.clone(), null, null);
     }
 
     /**
-     * Creates a MCTS from the given node.
-     *
-     * @param node Node to start search from
+     * Builds a MCTS from the root.
      */
-    private void search(Node node) {
+    private void build() {
         for (int sims = 0; sims < NUM_SIMULATIONS; sims++) {
-            Node bestChild = MonteCarloTreeSearchActions.select(node);
+            Node bestChild = MonteCarloTreeSearchActions.select(root);
             Kalah leafState = MonteCarloTreeSearchActions.simulate(bestChild);
             MonteCarloTreeSearchActions.backpropagate(bestChild, leafState);
         }
@@ -32,10 +32,9 @@ public class MonteCarloTreeSearch implements KalahPlayer {
     }
 
     @Override
-    public int getBestMove(Kalah state) {
-        Node node = new Node(state, null, null);
-        search(node);
-        Node bestNode = node.getChildWithHighestUTCReward();
+    public int getBestMove() {
+        build();
+        Node bestNode = root.getChildWithHighestUTCReward();
         Move bestMove = bestNode.getMove();
         LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() + ", visits: " + bestNode.getVisits());
         return bestMove.getHole();
@@ -43,7 +42,37 @@ public class MonteCarloTreeSearch implements KalahPlayer {
 
     @Override
     public void performMove(int move) {
-        root = root.getChildren().get(move);
+        Move currMove = new Move(root.getState().getSideToMove(), move);
+        root = findChildNodeWithMove(currMove);
+        root.setParent(null);
+    }
+
+    /**
+     * There should be a node from the root node which is obtained by applying the passed move
+     * to the root's game state. This new node can either already be constructed and therefore
+     * be one of the root's children, or it can be an unexplored move.
+     *
+     * @param move Move to apply to the current state of the game
+     * @return Node that represents the new game state
+     */
+    private Node findChildNodeWithMove(Move move) {
+        Optional<Node> childOpt = root.getChildren().stream()
+                .filter(child -> move.equals(child.getMove()))
+                .findAny();
+        return childOpt.orElseGet(() -> getNodeFromUnexploredMove(move));
+    }
+
+    private Node getNodeFromUnexploredMove(Move move) {
+        return root.getUnexploredMoves().stream()
+                .filter(move::equals)
+                .findAny()
+                .map(unexploredMove -> {
+                    root.getState().makeMove(unexploredMove);
+                    return new Node(root.getState(), unexploredMove, null);
+                })
+                .orElseThrow(() ->
+                        new IllegalStateException("No game state from current state using move " + move + " found.")
+                );
     }
 
     /**

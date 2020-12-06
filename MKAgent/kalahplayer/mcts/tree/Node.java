@@ -14,7 +14,7 @@ public class Node {
 
     private final Kalah state;
     private final Move move;
-    private final Node parent;
+    private Node parent;
     private final List<Node> children;
     private final List<Move> unexploredMoves;
     private int visits;
@@ -55,6 +55,10 @@ public class Node {
 
     public Node getParent() {
         return parent;
+    }
+
+    public void setParent(Node parent) {
+        this.parent = parent;
     }
 
     public int getVisits() {
