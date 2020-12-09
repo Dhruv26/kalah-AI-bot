@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 public class MonteCarloTreeSearch implements KalahPlayer {
     private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearch.class);
-    private static final int NUM_SIMULATIONS = 50000;
 
     private Node root;
 
@@ -23,11 +22,15 @@ public class MonteCarloTreeSearch implements KalahPlayer {
      * Builds a MCTS from the root.
      */
     private void build() {
-        for (int sims = 0; sims < NUM_SIMULATIONS; sims++) {
-            Node bestChild = MonteCarloTreeSearchActions.select(root);
-            Kalah leafState = MonteCarloTreeSearchActions.simulate(bestChild);
-            MonteCarloTreeSearchActions.backpropagate(bestChild, leafState);
-        }
+        BuildTree build = new BuildTree(root);
+        build.start();
+
+        // // TODO create another thread to interrupt the build tree
+        // if ()
+        // {
+            // build.interrupt();
+        // }
+
         LOGGER.info("Completed building MCTS.");
     }
 
