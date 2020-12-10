@@ -93,6 +93,6 @@ class MonteCarloTreeSearchActions {
         }
         Board board = finalState.getBoard();
         // Whoever has more seeds at the end of the game wins
-        return board.getSeedsInStore(side) - board.getSeedsInStore(side.opposite());
+        return Integer.compare(board.getSeedsInStore(side), board.getSeedsInStore(side.opposite()));
     }
 }
