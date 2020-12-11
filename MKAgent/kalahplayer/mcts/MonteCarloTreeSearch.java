@@ -18,11 +18,12 @@ public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
     private static final int MIN_SIMULATIONS = 50000;
 
     private Node root;
-    private final Lock lock;
+    // Using lock to protect any access to root. This ensure consistency of data.
+    private final Object lock;
 
     public MonteCarloTreeSearch(Kalah state) {
         root = new Node(state.clone(), null, null);
-        lock = new ReentrantLock();
+        lock = new Object();
     }
 
     @Override
@@ -35,28 +36,25 @@ public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
      */
     private void build() {
         LOGGER.info("Starting to build the tree on thread: " + Thread.currentThread().getName());
-        while (!root.getState().gameOver()) {
-            Node bestChild = MonteCarloTreeSearchActions.select(root);
-            Kalah leafState = MonteCarloTreeSearchActions.simulate(bestChild);
-            MonteCarloTreeSearchActions.backpropagate(bestChild, leafState);
+
+        while (!gameOver()) {
+            synchronized (lock) {
+                Node bestChild = MonteCarloTreeSearchActions.select(root);
+                Kalah leafState = MonteCarloTreeSearchActions.simulate(bestChild);
+                MonteCarloTreeSearchActions.backpropagate(bestChild, leafState);
+            }
         }
     }
 
     @Override
     public int getBestMove() {
         waitForMinSimulations();
-        try {
-            lock.lock();
-            LOGGER.info("-----------------Acquired the lock. Number of visits of root " + root.getVisits());
+        synchronized (lock) {
             Node bestNode = root.getChildWithMaxVisits();
             Move bestMove = bestNode.getMove();
             LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() +
-                    ", visits: " + bestNode.getVisits() + ", Number of visits of root: " + root.getVisits());
+                    ", visits: " + bestNode.getVisits());
             return bestMove.getHole();
-        }
-        finally {
-            LOGGER.info("--------------------Released the lock.");
-            lock.unlock();
         }
     }
 
@@ -77,25 +75,23 @@ public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
     }
 
     private boolean minSimulationsDone() {
-        try {
-            lock.lock();
+        synchronized (lock) {
             return root.getVisits() >= MIN_SIMULATIONS;
         }
-        finally {
-            lock.unlock();
+    }
+
+    private boolean gameOver() {
+        synchronized (lock) {
+            return root.getState().gameOver();
         }
     }
 
     @Override
     public void performMove(int move) {
-        try {
-            lock.lock();
+        synchronized (lock) {
             Move currMove = new Move(root.getState().getSideToMove(), move);
             root = findChildNodeWithMove(currMove);
             root.setParent(null);
-        }
-        finally {
-            lock.unlock();
         }
     }
 
