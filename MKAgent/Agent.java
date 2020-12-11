@@ -21,8 +21,22 @@ public class Agent {
     }
 
     public void play() throws IOException, InvalidMessageException {
-        MonteCarloTreeSearch player = startGameAndGetPlayer();
-        LOGGER.info("My side is " + kalah.getMySide() + "\n");
+        String startMsg = Main.recvMsg();
+        MsgType startMsgType = Protocol.getMessageType(startMsg);
+
+        verifyMessageType(MsgType.START, startMsgType);
+        boolean iAmFirst = Protocol.interpretStartMsg(startMsg);
+        if (iAmFirst) {
+            kalah.setMySide(Side.SOUTH);
+        }
+        else {
+            kalah.setMySide(Side.NORTH);
+        }
+        LOGGER.info("Start message: " + startMsg + ", My side is " + kalah.getMySide() + "\n");
+        MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
+        if (iAmFirst) {
+            playMove(player);
+        }
 
         while (true) {
             String msg = Main.recvMsg();
@@ -42,23 +56,6 @@ public class Agent {
             if (moveTurn.again) {
                 playMove(player);
             }
-        }
-    }
-
-    private MonteCarloTreeSearch startGameAndGetPlayer() throws InvalidMessageException, IOException {
-        String msg = Main.recvMsg();
-        MsgType msgType = Protocol.getMessageType(msg);
-
-        verifyMessageType(MsgType.START, msgType);
-        if (Protocol.interpretStartMsg(msg)) {
-            kalah.setMySide(Side.SOUTH);
-            MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
-            playMove(player);
-            return player;
-        }
-        else {
-            kalah.setMySide(Side.NORTH);
-            return new MonteCarloTreeSearch(kalah);
         }
     }
 
