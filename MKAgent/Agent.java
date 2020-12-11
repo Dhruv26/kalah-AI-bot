@@ -34,6 +34,8 @@ public class Agent {
         }
         LOGGER.info("Start message: " + startMsg + ", My side is " + kalah.getMySide() + "\n");
         MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
+        Thread runner = new Thread(player, "mcts-tree-builder");
+        runner.start();
         if (iAmFirst) {
             playMove(player);
         }

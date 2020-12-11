@@ -7,48 +7,96 @@ import kalahplayer.mcts.tree.Node;
 import utils.Log;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MonteCarloTreeSearch implements KalahPlayer {
+public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
     private static final Logger LOGGER = Log.getLogger(MonteCarloTreeSearch.class);
+    private static final int MIN_SIMULATIONS = 50000;
 
     private Node root;
+    private final Lock lock;
 
     public MonteCarloTreeSearch(Kalah state) {
         root = new Node(state.clone(), null, null);
+        lock = new ReentrantLock();
+    }
+
+    @Override
+    public void run() {
+        build();
     }
 
     /**
      * Builds a MCTS from the root.
      */
     private void build() {
-        BuildTree build = new BuildTree(root);
-        build.start();
-
-        // // TODO create another thread to interrupt the build tree
-        // if ()
-        // {
-            // build.interrupt();
-        // }
-
-        LOGGER.info("Completed building MCTS.");
+        LOGGER.info("Starting to build the tree on thread: " + Thread.currentThread().getName());
+        while (!root.getState().gameOver()) {
+            Node bestChild = MonteCarloTreeSearchActions.select(root);
+            Kalah leafState = MonteCarloTreeSearchActions.simulate(bestChild);
+            MonteCarloTreeSearchActions.backpropagate(bestChild, leafState);
+        }
     }
 
     @Override
     public int getBestMove() {
-        build();
-        // Getting child with maximum number of visits outperform child with maximum UTC score.
-        Node bestNode = root.getChildWithMaxVisits();
-        Move bestMove = bestNode.getMove();
-        LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() + ", visits: " + bestNode.getVisits());
-        return bestMove.getHole();
+        waitForMinSimulations();
+        try {
+            lock.lock();
+            LOGGER.info("-----------------Acquired the lock. Number of visits of root " + root.getVisits());
+            Node bestNode = root.getChildWithMaxVisits();
+            Move bestMove = bestNode.getMove();
+            LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() +
+                    ", visits: " + bestNode.getVisits() + ", Number of visits of root: " + root.getVisits());
+            return bestMove.getHole();
+        }
+        finally {
+            LOGGER.info("--------------------Released the lock.");
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Polls every second to check if MIN_SIMULATIONS from the root
+     * have been performed.
+     */
+    private void waitForMinSimulations() {
+        while (!minSimulationsDone()) {
+            try {
+                LOGGER.info("Waiting for the tree to build.");
+                TimeUnit.SECONDS.sleep(5);
+            }
+            catch (InterruptedException e) {
+                LOGGER.log(Level.SEVERE, "Error occurred while trying to sleep.", e);
+            }
+        }
+    }
+
+    private boolean minSimulationsDone() {
+        try {
+            lock.lock();
+            return root.getVisits() >= MIN_SIMULATIONS;
+        }
+        finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public void performMove(int move) {
-        Move currMove = new Move(root.getState().getSideToMove(), move);
-        root = findChildNodeWithMove(currMove);
-        root.setParent(null);
+        try {
+            lock.lock();
+            Move currMove = new Move(root.getState().getSideToMove(), move);
+            root = findChildNodeWithMove(currMove);
+            root.setParent(null);
+        }
+        finally {
+            lock.unlock();
+        }
     }
 
     /**
