@@ -110,6 +110,12 @@ public class Node {
                 .orElseThrow(NoSuchElementException::new);
     }
 
+    public Node getChildWithMaxVisits() {
+        return getChildren().stream()
+                .max(comparing(Node::getVisits))
+                .orElseThrow(() -> new RuntimeException("No child node found."));
+    }
+
     public void update(double reward) {
         setReward(getReward() + reward);
         setVisits(getVisits() + 1);

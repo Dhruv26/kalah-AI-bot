@@ -37,7 +37,8 @@ public class MonteCarloTreeSearch implements KalahPlayer {
     @Override
     public int getBestMove() {
         build();
-        Node bestNode = root.getChildWithHighestUTCReward();
+        // Getting child with maximum number of visits outperform child with maximum UTC score.
+        Node bestNode = root.getChildWithMaxVisits();
         Move bestMove = bestNode.getMove();
         LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() + ", visits: " + bestNode.getVisits());
         return bestMove.getHole();
