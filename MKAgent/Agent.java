@@ -32,7 +32,7 @@ public class Agent {
         else {
             kalah.setMySide(Side.NORTH);
         }
-        LOGGER.info("Start message: " + startMsg + ", My side is " + kalah.getMySide() + "\n");
+        LOGGER.finest("Start message: " + startMsg + ", My side is " + kalah.getMySide() + "\n");
         MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
         Thread runner = new Thread(player, "mcts-tree-builder");
         runner.start();
@@ -43,18 +43,18 @@ public class Agent {
         while (true) {
             String msg = Main.recvMsg();
             MsgType msgType = Protocol.getMessageType(msg);
-            LOGGER.info("Received message: " + msg.strip());
+            LOGGER.finest("Received message: " + msg.trim());
 
             if (msgType == MsgType.END) {
-                LOGGER.info("Game has ended. The Game state is\n" + kalah);
+                LOGGER.finest("Game has ended. The Game state is\n" + kalah);
                 return;
             }
 
             verifyMessageType(MsgType.STATE, msgType);
             Protocol.MoveTurn moveTurn = Protocol.interpretStateMsg(msg);
             updateState(player, moveTurn.move);
-            LOGGER.info("Received move: " + moveTurn);
-            LOGGER.info("New state of the game:\n" + kalah);
+            LOGGER.finest("Received move: " + moveTurn);
+            LOGGER.finest("New state of the game:\n" + kalah);
             if (moveTurn.again) {
                 playMove(player);
             }
@@ -76,7 +76,7 @@ public class Agent {
         else {
             moveMsg = Protocol.createMoveMsg(bestMove);
         }
-        LOGGER.info("Making move: " + moveMsg);
+        LOGGER.finest("Making move: " + moveMsg);
         Main.sendMsg(moveMsg);
     }
 

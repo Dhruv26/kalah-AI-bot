@@ -8,8 +8,6 @@ import utils.Log;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,8 +33,6 @@ public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
      * Builds a MCTS from the root.
      */
     private void build() {
-        LOGGER.info("Starting to build the tree on thread: " + Thread.currentThread().getName());
-
         while (!gameOver()) {
             synchronized (lock) {
                 Node bestChild = MonteCarloTreeSearchActions.select(root);
@@ -52,7 +48,7 @@ public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
         synchronized (lock) {
             Node bestNode = root.getChildWithMaxVisits();
             Move bestMove = bestNode.getMove();
-            LOGGER.info("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() +
+            LOGGER.finest("Best move: hole " + bestMove.getHole() + ", reward: " + bestNode.getReward() +
                     ", visits: " + bestNode.getVisits());
             return bestMove.getHole();
         }
@@ -65,7 +61,7 @@ public class MonteCarloTreeSearch implements KalahPlayer, Runnable {
     private void waitForMinSimulations() {
         while (!minSimulationsDone()) {
             try {
-                LOGGER.info("Waiting for the tree to build.");
+                LOGGER.finest("Waiting for the tree to build.");
                 TimeUnit.SECONDS.sleep(5);
             }
             catch (InterruptedException e) {

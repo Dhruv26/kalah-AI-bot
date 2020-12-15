@@ -15,7 +15,7 @@ public class Log {
     static {
         Handler handler;
         try {
-            handler = new FileHandler(LOG_FILE_NAME, true);
+            handler = new FileHandler(LOG_FILE_NAME, false);
         } catch (IOException e) {
             handler = new ConsoleHandler();
         }
