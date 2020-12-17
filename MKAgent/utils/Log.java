@@ -13,12 +13,7 @@ public class Log {
     private static final Handler LOG_HANDLER;
 
     static {
-        Handler handler;
-        try {
-            handler = new FileHandler(LOG_FILE_NAME, false);
-        } catch (IOException e) {
-            handler = new ConsoleHandler();
-        }
+        Handler handler = new ConsoleHandler();
         handler.setFormatter(new SimpleFormatter());
         LOG_HANDLER = handler;
     }
