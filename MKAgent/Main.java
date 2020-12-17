@@ -17,8 +17,9 @@ public class Main
 {
     private static final Logger LOGGER = Log.getLogger(Main.class);
 
-    private static final int holes = 7;
-    private static final int seeds = 7;
+    private static final int HOLES = 7;
+    private static final int SEEDS = 7;
+
     /**
      * Input from the game engine.
      */
@@ -63,7 +64,7 @@ public class Main
 	public static void main(String[] args)
 	{
 		try {
-			Agent agent = new Agent(holes, seeds);
+			Agent agent = new Agent(HOLES, SEEDS);
 			agent.play();
 		} catch (InvalidMessageException | IOException | RuntimeException e) {
 			LOGGER.log(Level.SEVERE, "This shouldn't happen: " + e.getMessage(), e);

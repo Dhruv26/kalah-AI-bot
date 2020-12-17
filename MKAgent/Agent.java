@@ -14,13 +14,17 @@ import java.util.logging.Logger;
 public class Agent {
     private static final Logger LOGGER = Log.getLogger(Agent.class);
 
-    private final Kalah kalah;
+    private final int holes;
+    private final int seeds;
 
     public Agent(final int holes, final int seeds) {
-        this.kalah = new Kalah(new Board(holes, seeds), Side.SOUTH);
+        this.holes = holes;
+        this.seeds = seeds;
     }
 
     public void play() throws IOException, InvalidMessageException {
+        Kalah kalah = new Kalah(new Board(holes, seeds), Side.NORTH);
+
         String startMsg = Main.recvMsg();
         MsgType startMsgType = Protocol.getMessageType(startMsg);
 
@@ -36,7 +40,7 @@ public class Agent {
         MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
         Thread runner = new Thread(player, "mcts-tree-builder");
         runner.start();
-        if (iAmFirst) {
+        if (kalah.getMySide() == Side.SOUTH) {
             playMove(player);
         }
 
@@ -46,7 +50,7 @@ public class Agent {
             LOGGER.finest("Received message: " + msg.trim());
 
             if (msgType == MsgType.END) {
-                LOGGER.finest("Game has ended. The Game state is\n" + kalah);
+                LOGGER.finest("Game has ended.");
                 return;
             }
 
@@ -54,7 +58,6 @@ public class Agent {
             Protocol.MoveTurn moveTurn = Protocol.interpretStateMsg(msg);
             updateState(player, moveTurn.move);
             LOGGER.finest("Received move: " + moveTurn);
-            LOGGER.finest("New state of the game:\n" + kalah);
             if (moveTurn.again) {
                 playMove(player);
             }
@@ -62,7 +65,6 @@ public class Agent {
     }
 
     private void updateState(MonteCarloTreeSearch player, int moveHole) {
-        kalah.makeMove(moveHole);
         player.performMove(moveHole);
     }
 
