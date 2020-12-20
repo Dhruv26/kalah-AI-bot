@@ -1,34 +1,21 @@
-# COMP34120-sem1-project
+# AI bot for the game Mancala (Kalah)
 
-# put all files directory in source.txt
-## WINDOWS
-dir /s /B *.java > source.txt
+We try two approaches for the game:
+* Monte Carlo Tree Search (MCTS)
+* Minimax with Alpha-Beta Pruning
 
-## LINUX
-find $(pwd) -name *.java > source.txt
+**MCTS** is defined in the master branch. **Minimax with Alpha Beta Pruning** is defined in the *heuristic* branch.
 
+**ManKalah.jar** is the game engine. It accepts two string, ie the commands to run two bots against each other.
 
-# compile
-javac @source.txt
+Some test agents are defined in the *Test_Agents* folder. These have been provided by The University of Manchester.
 
+#### Compile
+To compile the bot, run the script *compile.sh*
 
-# run
-java -classpath MKAgent Main
+#### Run
+To run the bot, run the script *run.sh*
 
-
-
-
-
-
-
-# logging
-## note: 
-## - have to setlevel
-## - setlevel(Level.INFO) logs info, warning, and sever msg; 
-## - setlevel(Level.WARNING) logs warning, and sever msg and so on
-
-Log log = new Log("log");
-log.logger.setLevel(Level.SEVERE);
-log.logger.info("Info msg");
-log.logger.warning("Warning msg");
-log.logger.severe("Severe msg");
+#### Future Improvements
+* Add game specific knowledge to MCTS
+* Apply heuristics (like RAVE, greedy simulation) to MCTS
