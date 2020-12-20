@@ -1,8 +1,13 @@
+import protocol.InvalidMessageException;
+import utils.Log;
+
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The main application class. It also provides methods for communication
@@ -10,8 +15,11 @@ import java.io.Reader;
  */
 public class Main
 {
-    private static final int holes = 7;
-    private static final int seeds = 7;
+    private static final Logger LOGGER = Log.getLogger(Main.class);
+
+    private static final int HOLES = 7;
+    private static final int SEEDS = 7;
+
     /**
      * Input from the game engine.
      */
@@ -53,20 +61,13 @@ public class Main
 	 * The main method, invoked when the program is started.
 	 * @param args Command line arguments.
 	 */
-	public static void main(String[] args) throws Exception
+	public static void main(String[] args)
 	{
-		// TODO: implement
-        try
-    	{
-            Agent agent = new Agent(holes,seeds);
-            agent.play();
-        } catch(InvalidMessageException e) {
-            System.err.println("This shouldn't happen: " + e.getMessage());
-        } catch(IOException e) {
-        	System.err.println("This shouldn't happen: " + e.getMessage());
-        } catch(CloneNotSupportedException e) {
-            System.err.println("This shouldn't happen: " + e.getMessage());
-        }
+		try {
+			Agent agent = new Agent(HOLES, SEEDS);
+			agent.play();
+		} catch (InvalidMessageException | IOException | RuntimeException e) {
+			LOGGER.log(Level.SEVERE, "This shouldn't happen: " + e.getMessage(), e);
+		}
 	}
-
 }

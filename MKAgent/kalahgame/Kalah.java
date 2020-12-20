@@ -1,9 +1,20 @@
+package kalahgame;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * This class deals with moves on a Kalah board.
+ * This class deals with moves on a kalahgame.Kalah board.
  */
 public class Kalah
 {
+	// Player's side (SOUTH or NORTH)
+	private Side mySide;
+	
+	// Side which has to do next move
+	private Side sideToMove;
+	private boolean northHasMoved;
+
     /**
      * The board to play on.
      */
@@ -13,11 +24,27 @@ public class Kalah
      * @param board The board to play on.
      * @throws NullPointerException if "board" is null.
      */
-    public Kalah (Board board) throws NullPointerException
+    public Kalah (Board board, Side mySide)
     {
     	if (board == null)
     		throw new NullPointerException();
-    	this.board = board;
+		this.board = board;
+		this.mySide = mySide;
+		this.sideToMove = Side.SOUTH;
+		this.northHasMoved = false;
+    }
+
+    public Kalah(Kalah other) {
+    	if (other == null)
+    		throw new NullPointerException("other cannot be null.");
+    	this.board = other.board.clone();
+    	this.mySide = other.mySide;
+    	this.sideToMove = other.sideToMove;
+    	this.northHasMoved = other.northHasMoved;
+	}
+
+    public Kalah clone() {
+        return new Kalah(this);
     }
 
     /**
@@ -31,13 +58,18 @@ public class Kalah
     /**
      * Checks whether a given move is legal on the underlying board. The move
      * is not actually made.
+	 *
      * @param move The move to check.
      * @return true if the move is legal, false if not.
      */
     public boolean isLegalMove (Move move)
     {
-    	return isLegalMove(board, move);
+    	return isLegalMove(board, move, northHasMoved);
     }
+
+	public Side makeMove(int hole) {
+		return makeMove(new Move(getSideToMove(), hole));
+	}
 
     /**
      * Performs a move on the underlying board. The move must be legal. If
@@ -55,7 +87,23 @@ public class Kalah
      */
     public Side makeMove (Move move)
     {
-    	return makeMove(board, move);
+    	if (!isLegalMove(move)) {
+			throw new RuntimeException("Illegal move [" + move + "] for current state [" + this + "]");
+		}
+		if (move.getSide() == Side.NORTH) {
+			northHasMoved = true;
+		}
+
+		Side sideToMoveNext;
+		if (move.isSwap()) {
+			swapMySide();
+			sideToMoveNext = Side.NORTH;
+		}
+		else {
+			sideToMoveNext = makeMove(board, move, northHasMoved);
+		}
+		setSideToMove(sideToMoveNext);
+		return getSideToMove();
     }
 
     /**
@@ -67,15 +115,37 @@ public class Kalah
     	return gameOver(board);
     }
 
+    public List<Move> getAllPossibleMoves() {
+		List<Move> movesList = new ArrayList<>();
+
+		for (int i = 1; i <= board.getNoOfHoles(); i++) {
+			Move m = new Move(getSideToMove(), i);
+			if (isLegalMove(m))
+				movesList.add(m);
+		}
+		Move swapMove = new Move(getSideToMove(), Move.SWAP);
+		if (isLegalMove(swapMove)) {
+			movesList.add(swapMove);
+		}
+
+		return movesList;
+	}
+
     /**
      * Checks whether a given move is legal on a given board. The move
      * is not actually made.
+	 *
      * @param board The board to check the move for.
      * @param move The move to check.
+	 * @param northHasMoved North has made it's first move.
      * @return true if the move is legal, false if not.
      */
-    public static boolean isLegalMove (Board board, Move move)
+    private static boolean isLegalMove (Board board, Move move, boolean northHasMoved)
     {
+    	if (move.getHole() == -1) {
+    		// Pie rule. SWAP can only be used by NORTH in it's first turn.
+    		return !northHasMoved && move.getSide() == Side.NORTH;
+		}
     	// check if the hole is existent and non-empty:
     	return (move.getHole() <= board.getNoOfHoles())
     	       && (board.getSeeds(move.getSide(), move.getHole()) != 0);
@@ -90,13 +160,14 @@ public class Kalah
      *
      * @param board The board to make the move on.
      * @param move The move to make.
+	 * @param northHasMoved North has made it's first move.
      * @return The side who's turn it is after the move. Arbitrary if the
      *         game is over.
-     * @see #isLegalMove(Board, Move)
+     * @see #isLegalMove(Board, Move, boolean)
      * @see #gameOver(Board)
      * @see java.util.Observable#notifyObservers(Object)
      */
-    public static Side makeMove (Board board, Move move)
+    private static Side makeMove (Board board, Move move, boolean northHasMoved)
     {
 		/* from the documentation:
 		  "1. The counters are lifted from this hole and sown in anti-clockwise direction, starting
@@ -104,7 +175,7 @@ public class Kalah
 		      opponent's kalahah is skipped.
 		   2. outcome:
 		    	1. if the last counter is put into the player's kalahah, the player is allowed to
-		    	   move again (such a move is called a Kalah-move);
+		    	   move again (such a move is called a kalahgame.Kalah-move);
 		    	2. if the last counter is put in an empty hole on the player's side of the board
 		    	   and the opposite hole is non-empty,
 		    	   a capture takes place: all stones in the opposite opponents pit and the last
@@ -201,7 +272,7 @@ public class Kalah
     	board.notifyObservers(move);
 
     	// who's turn is it?
-    	if (sowHole == 0)  // the store (implies (sowSide == move.getSide()))
+    	if (sowHole == 0 && northHasMoved)  // the store (implies (sowSide == move.getSide()))
     		return move.getSide();  // move again
     	else
     		return move.getSide().opposite();
@@ -229,7 +300,36 @@ public class Kalah
     public static boolean gameOver (Board board)
     {
     	// The game is over if one of the agents can't make another move.
-
     	return holesEmpty(board, Side.NORTH) || holesEmpty(board, Side.SOUTH);
     }
+
+	public Side getSideToMove() {
+		return sideToMove;
+	}
+
+	public Side getMySide() {
+		return mySide;
+	}
+
+	public void setMySide(Side mySide) {
+		this.mySide = mySide;
+	}
+
+	public void swapMySide() {
+    	setMySide(getMySide().opposite());
+	}
+
+	public void setSideToMove(Side sideToMove) {
+		this.sideToMove = sideToMove;
+	}
+
+	@Override
+	public String toString() {
+		return "Kalah{" +
+				"mySide=" + mySide +
+				", sideToMove=" + sideToMove +
+				", northHasMoved=" + northHasMoved +
+				", board=" + board +
+				'}';
+	}
 }

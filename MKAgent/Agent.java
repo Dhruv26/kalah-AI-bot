@@ -1,103 +1,90 @@
-import java.io.*;
-import java.util.concurrent.ThreadLocalRandom;
+import kalahgame.Board;
+import kalahgame.Kalah;
+import kalahgame.Move;
+import kalahgame.Side;
+import kalahplayer.mcts.MonteCarloTreeSearch;
+import protocol.InvalidMessageException;
+import protocol.MsgType;
+import protocol.Protocol;
+import utils.Log;
 
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class Agent {
+    private static final Logger LOGGER = Log.getLogger(Agent.class);
 
-  protected Side ourSide;
-  protected Kalah kalah;
-  protected int holes;
-  // protected int maxDepth; // for future use
+    private final int holes;
+    private final int seeds;
 
-  public Agent(final int holes, final int seeds) throws IOException {
-    this.ourSide = Side.SOUTH;
-    this.holes = holes;
-    this.kalah = new Kalah(new Board(holes, seeds));
-    // this.maxDepth = 4; For future use (Alpha beta pruning or min max)
-  }
-
-//---------------------------------------------------------------------------------------------------------------
-
-
-  protected void swap() {
-    this.ourSide = this.ourSide.opposite();
-  }
-  // Method for choosing the next Move currently a stub
-  protected int bestNextMove() throws CloneNotSupportedException, IOException {
-    int bestMove = 0;
-
-    for (int i = 1; i <= this.holes; ++i) {
-      Move m = new Move(this.ourSide,i);
-      if(this.kalah.isLegalMove(m))
-      {
-        bestMove = i;
-        break;
-      }
+    public Agent(final int holes, final int seeds) {
+        this.holes = holes;
+        this.seeds = seeds;
     }
 
-    return bestMove;
-  }
+    public void play() throws IOException, InvalidMessageException {
+        Kalah kalah = new Kalah(new Board(holes, seeds), Side.NORTH);
 
-  public void play() throws IOException, InvalidMessageException, CloneNotSupportedException {
+        String startMsg = Main.recvMsg();
+        MsgType startMsgType = Protocol.getMessageType(startMsg);
 
-    // Receive Message
-    String msg = Main.recvMsg();
-    // Choose the Message Type
-    MsgType msgType = Protocol.getMessageType(msg);
-    // If the message is END, end the game.
-    if (msgType == MsgType.END) {
-      return;
-    }
-    // If the message is not START, throws error.
-    if (msgType != MsgType.START) {
-      throw new InvalidMessageException("Expected a start message but got something else.");
-    }
-    // If the start message is SOUTH
-    // Means we are first player
-    if (Protocol.interpretStartMsg(msg)) {
-      this.ourSide = Side.SOUTH;
-      // First Move
-      Main.sendMsg(Heuristic.firstMove());
-    }
-    else {
-      // Means we are second player
-      this.ourSide = Side.NORTH;
-    }
-    // Game Loop
-    while (true) {
-      // Receive System Message
-      msg = Main.recvMsg();
-      // Get MSG type
-      msgType = Protocol.getMessageType(msg);
-      // If the MSG is END
-      // Return to the main
-      if (msgType == MsgType.END) {
-        return;
-      }
-      // If the MSG is not the STATE
-      // Throws Exception
-      if (msgType != MsgType.STATE) {
-        throw new InvalidMessageException("Expected a state message but got something else.");
-      }
-      // Check if extra move turn
-      final Protocol.MoveTurn moveTurn = Protocol.interpretStateMsg(msg, this.kalah.getBoard());
-      if (moveTurn.move == -1) {
-        this.swap();
-      }
-      // If not skip the current iteration
-      if (!moveTurn.again || moveTurn.end) {
-        continue;
-      }
-      msg = null;
+        verifyMessageType(MsgType.START, startMsgType);
+        boolean iAmFirst = Protocol.interpretStartMsg(startMsg);
+        if (iAmFirst) {
+            kalah.setMySide(Side.SOUTH);
+        }
+        else {
+            kalah.setMySide(Side.NORTH);
+        }
+        LOGGER.finest("Start message: " + startMsg + ", My side is " + kalah.getMySide() + "\n");
+        MonteCarloTreeSearch player = new MonteCarloTreeSearch(kalah);
+        Thread runner = new Thread(player, "mcts-tree-builder");
+        runner.start();
+        if (kalah.getMySide() == Side.SOUTH) {
+            playMove(player);
+        }
 
-      int nextMove = this.bestNextMove();
+        while (true) {
+            String msg = Main.recvMsg();
+            MsgType msgType = Protocol.getMessageType(msg);
+            LOGGER.finest("Received message: " + msg.trim());
 
+            if (msgType == MsgType.END) {
+                LOGGER.finest("Game has ended.");
+                return;
+            }
 
-     // If can swap
-      if (msg == null) {
-        msg = Protocol.createMoveMsg(nextMove);
-      }
-      Main.sendMsg(msg);
+            verifyMessageType(MsgType.STATE, msgType);
+            Protocol.MoveTurn moveTurn = Protocol.interpretStateMsg(msg);
+            updateState(player, moveTurn.move);
+            LOGGER.finest("Received move: " + moveTurn);
+            if (moveTurn.again) {
+                playMove(player);
+            }
+        }
     }
-  }
+
+    private void updateState(MonteCarloTreeSearch player, int moveHole) {
+        player.performMove(moveHole);
+    }
+
+    private void playMove(MonteCarloTreeSearch player) {
+        String moveMsg;
+        int bestMove = player.getBestMove();
+        if (bestMove == Move.SWAP) {
+            updateState(player, bestMove);
+            moveMsg = Protocol.createSwapMsg();
+        }
+        else {
+            moveMsg = Protocol.createMoveMsg(bestMove);
+        }
+        LOGGER.finest("Making move: " + moveMsg);
+        Main.sendMsg(moveMsg);
+    }
+
+    private static void verifyMessageType(MsgType expected, MsgType actual) throws InvalidMessageException {
+        if (expected != actual) {
+            throw new InvalidMessageException(String.format("Expected %s, Actual: %s", expected, actual));
+        }
+    }
 }
